@@ -1,5 +1,6 @@
 import vue from 'rollup-plugin-vue'
 import babel from 'rollup-plugin-babel'
+import { terser } from 'rollup-plugin-terser'
 import pkg from './package.json'
 
 function version(name) {
@@ -38,4 +39,17 @@ export default [
       },
     ],
   },
+  {
+    input: 'src/index.js',
+    plugins: [vue(), babel(), terser()],
+    output: [
+      {
+        banner,
+        name: 'LazyImage',
+        format: 'iife',
+        file: pkg.unpkg,
+        exports: 'named',
+      },
+    ],
+  }
 ]
