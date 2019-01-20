@@ -1,5 +1,10 @@
 <script>
-import { Observer } from "./observer";
+import PropTypes from "@znck/prop-types";
+import Observer from "./observer";
+
+export const defaults = {
+  // TODO: Add url encoded fallback thumbnail.
+};
 
 const isBrowser = typeof window !== "undefined";
 
@@ -7,41 +12,18 @@ export default {
   inheritAttrs: false,
 
   props: {
-    src: {
-      type: String,
-      required: true
-    },
-    thumbnail: {
-      type: String,
-      default:
-        typeof __LAZY_IMAGE_THUMBNAIL__ !== "undefined"
-          ? __LAZY_IMAGE_THUMBNAIL__
-          : "" // TODO: Add url encoded fallback thumbnail.
-    },
-    alt: {
-      type: String,
-      required: true
-    },
-    critical: {
-      type: Boolean,
-      default: false
-    },
-    eager: {
-      type: Boolean,
-      default: false
-    },
-    root: {
-      type: Element,
-      default: null
-    },
-    height: {
-      type: [Number, String],
-      default: null
-    },
-    width: {
-      type: [Number, String],
-      default: null
-    }
+    src: PropTypes.string.isRequired,
+    thumbnail: PropTypes.string.value(() =>
+      typeof __LAZY_IMAGE_THUMBNAIL__ !== "undefined"
+        ? __LAZY_IMAGE_THUMBNAIL__
+        : defaults.thumbnail
+    ),
+    alt: PropTypes.string.isRequired,
+    critical: PropTypes.bool,
+    eager: PropTypes.bool,
+    root: PropTypes.instanceOf(Element),
+    height: PropTypes.oneOfType(Number, String),
+    width: PropTypes.oneOfType(Number, String)
   },
 
   data: () => ({
@@ -57,13 +39,13 @@ export default {
   },
 
   beforeCreate() {
-    if (process.env.NODE_ENV !== "production") {
+    PropTypes.validate(() => {
       if (this.height === null || this.width) {
-        console.warn(
+        throw new Error(
           `LazyImg should be used with expected height and width. The height and width are used to render correct sized placeholder.`
         );
       }
-    }
+    });
   },
 
   created() {
@@ -79,7 +61,7 @@ export default {
     if (this.critical && this.src !== this.$el.getAttribute("src"))
       return this.load().then(() => (this.isVisible = true));
 
-    this.observer = Observer.from(this.root);
+    this.observer = Observer(this.root || null);
 
     if (!this.isLoaded) {
       if (this.eager) this.load();
