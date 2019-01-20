@@ -1,6 +1,6 @@
 {
   "name": "lazy-image-component",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Defer or lazy load images",
   "repository": {
     "type": "git",
